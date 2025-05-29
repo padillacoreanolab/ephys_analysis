@@ -9,7 +9,7 @@
             "type": "debugpy",
             "request": "launch",
             "module": "lfp.habit_dishabit",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder:ephys_analysis}",
             "justMyCode": false  // This allows stepping into library code
 
         },

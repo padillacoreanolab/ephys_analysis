@@ -1,8 +1,8 @@
 import spikeinterface.extractors as se
 import spikeinterface.preprocessing as sp
-import lfp.lfp_analysis.preprocessor as preprocessor
-import lfp.lfp_analysis.connectivity_wrapper as connectivity_wrapper
-import lfp.trodes.read_exported as trodes
+import preprocessor as preprocessor
+import connectivity_wrapper as connectivity_wrapper
+import read_exported as trodes
 from scipy.interpolate import interp1d
 import os
 from pathlib import Path

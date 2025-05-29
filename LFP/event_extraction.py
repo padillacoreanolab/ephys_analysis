@@ -6,9 +6,9 @@ from bidict import bidict
 from collections import defaultdict
 from matplotlib import cm
 from itertools import combinations
-from lfp.lfp_analysis.LFP_collection import LFPCollection
-from lfp.lfp_analysis.LFP_recording import LFPRecording
-import lfp.lfp_analysis.plotting as lfplt
+from LFP_collection import LFPCollection
+from LFP_recording import LFPRecording
+import plotting as lfplt
 
 def all_set(collection):
     """

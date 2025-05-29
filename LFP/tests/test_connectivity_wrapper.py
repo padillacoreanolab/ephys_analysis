@@ -1,9 +1,9 @@
 import numpy as np
 import unittest
 import os
-import lfp.lfp_analysis.preprocessor as preprocessor
-import lfp.lfp_analysis.connectivity_wrapper as connectivity_wrapper
-from lfp.tests import utils
+import preprocessor as preprocessor
+import connectivity_wrapper as connectivity_wrapper
+from tests import utils
 
 SUBJECT_DICT = {"mPFC": 19, "vHPC": 31, "BLA": 30, "NAc": 28, "MD": 29}
 SPIKE_GADGETS_MULTIPLIER = 0.6745

@@ -1,7 +1,7 @@
 from pathlib import Path
 from tqdm import tqdm
-from lfp.lfp_analysis.LFP_recording import LFPRecording
-import lfp.lfp_analysis.preprocessor as preprocessor
+from LFP_recording import LFPRecording
+import preprocessor as preprocessor
 import os
 import numpy as np
 import json

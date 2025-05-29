@@ -1,3 +1,5 @@
+# Spike Data Analysis
+
 This folder contains scripts to do analysis on spike-sorted data output from Phy. It contains scripts to do single cell analyses (Wilcoxon tests, raster plots, and bootstrap firing rate comparisons), PCA analyses and trajectory visualizations, classifiers to predict  behavioral events based on population activity, and functions to normalize firing rates. 
 
 

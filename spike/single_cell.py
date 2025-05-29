@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import sem, ranksums, fisher_exact, wilcoxon
 from multiprocessing import Pool
 from sklearn.preprocessing import StandardScaler
-import spike.spike_analysis.normalization as normalization
+import spike.normalization as normalization
 
 
 def pre_event_window(event, baseline_window, offset):

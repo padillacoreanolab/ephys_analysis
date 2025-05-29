@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import io
 from unittest.mock import patch
-from spike.spike_analysis.spike_recording import SpikeRecording
+from spike.spike_recording import SpikeRecording
 
 
 class TestSpikeRecording(unittest.TestCase):
@@ -35,7 +35,7 @@ class TestSpikeRecording(unittest.TestCase):
             data_path = r"tests/test_data/test_recording_merged.rec"
             test_recording = SpikeRecording(data_path)
             self.assertNotIn("169", test_recording.labels_dict)
-            test_recording.spike_specs()
+            test_recording.__spike_specs__()
             # Get what was printed
             printed_output = fake_stdout.getvalue()
             # Assert the expected message is in the output

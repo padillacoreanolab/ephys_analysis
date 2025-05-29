@@ -1,6 +1,6 @@
 import unittest
-from lfp.lfp_analysis.LFP_collection import LFPCollection
-from lfp.tests.utils import TEST_DATA_DIR
+from lfp.LFP_collection import LFPCollection
+from tests.utils import TEST_DATA_DIR
 import shutil
 import os
 import json

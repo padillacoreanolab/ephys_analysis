@@ -1,14 +1,54 @@
 # ephys_analysis
 This repository holds code to conduct ephys analysis on data files that come from trodes and phy files. It also has code to extract behavior data from Boris and ECU data and some tools to manipulate behavioral epochs. 
 
+### Prerequisites
+- conda or miniconda installed
+
+### Setup
+1. Clone this repository:
+   ```
+   bash
+   git clone https://github.com/padillacoreanolab/ephys_analysis.git
+   cd ephys_analysis
+   ```
+2. Create and activate conda environment
+```
+conda env create -f ephys_env.yml
+conda activate ephys_env
+```
+3. Install the packages
+```
+bash 
+pip install -e . 
+```
+4. Clone your own project repository and import functions from ephys_analysis at top like this:
+```
+from ephys_analysis.lfp.lfp_collection import LFPCollection
+```
+
+## What do you need
+- LFP: Current version of this code assumes you have recorded your data through Trodes and have kept the *.rec/*merged.rec data folder structure. 
+- Spike: current version of this code assumes you have done manual spike sorting through Phy and have saved everything under a *merged.rec/phy/.. data structure. 
+- Behavior: both Spike and LFP analysis require the same format of behavior input for analysis, currently helper functions exist under Behavior for BORIS and ECU derived behavior data. 
+
+## Step 0. LFP + ECU + Analog
+trodes_export.py has functions that will allow you batch export various files through trodes. You will need trodes installed onto your local device. 
+- time: export needed to find the first timestamp of a recording for all LFP, ECU and analog analysis
+- DIO: if you used the ECU to record operant chamber inputs, you will need to extract DIO files 
+- analog: if you used any Ain inputs to record, you will need to extract analog files 
 
 
-.vscode settings: 
 
-changed through the settings tab under workspace we changed the following setting (File>Preference>Settings or Ctrl+,)
+
+
+## .vscode settings: 
+
+To use this notebook the most efficiently, open the ephys_analysis repository in your vscode workspace then under file press Add Folder to Workspace. This folder should be your own personal workspace folder. 
+
+Then change your current working directory through the settings tab under workspace (File>Preference>Settings or Ctrl+, and click the workspace tab and Ctrl+F "terminal cwd")
 
 Jupyter: Notebook File Root
-${workspaceFolder}
+${workspaceFolder:ephys_analysis}
 
 this means that the parent folder opened in VSCode is the workspaceFolder which is set as the working directory 
 
@@ -43,9 +83,7 @@ python -m tests.utils download_test_data
 please open terminal and run in this directory
 
 ```
-python -m tests.util
-cd diff_fam_social_memory_ephys/lfp
-python -m unittest discover
+python -m unittest discover -s *folder_you_want_to_test* -p '*test*.py
 ```
 
 ## How to run single files as modules

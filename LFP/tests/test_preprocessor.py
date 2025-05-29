@@ -2,7 +2,7 @@ import os
 import numpy as np
 import unittest
 import bidict
-import lfp.lfp_analysis.preprocessor as preprocessor
+import preprocessor as preprocessor
 import shutil
 from lfp.tests import utils
 
@@ -60,17 +60,17 @@ class test_lfp_recording_preprocessing(unittest.TestCase):
         brain_regions, sorted_channels = preprocessor.map_to_region(SUBJECT_DICT)
         zscore_traces = preprocessor.zscore(traces)
         scaled_traces = preprocessor.scale_voltage(traces, 0.195)
-        zscore_threshold = preprocessor.filter(zscore_traces, scaled_traces, 4)
+        zscore_threshold = preprocessor.zscore_filter(zscore_traces, scaled_traces, 4)
         preprocessor.plot_zscore(traces, zscore_traces, zscore_threshold, OUTPUT_FILE_PATH)
         self.assertTrue(os.path.exists(OUTPUT_DIR))
 
-    def test_filter(self):
+    def test_zscore_filter(self):
         zscores = np.array([[-5.0, -1.0, 2.0, 3.0, 4.0, 5.0], [-5.0, -1.0, 2.0, 3.0, 4.0, 5.0]])
         voltage_scaled = np.array(
             [[-0.975, -0.195, 0.39, 0.585, 0.78, 0.975], [-0.975, -0.195, 0.39, 0.585, 0.78, 0.975]]
         )
         threshold = 3
-        filtered_zscores = preprocessor.filter(zscores, voltage_scaled, threshold)
-        self.assertEqual(filtered_zscores.shape, zscores.shape)
-        self.assertTrue(np.isnan(filtered_zscores[0][0]))
-        self.assertEqual(filtered_zscores[0][1], -0.195)
+        zscore_filtered_zscores = preprocessor.zscore_filter(zscores, voltage_scaled, threshold)
+        self.assertEqual(zscore_filtered_zscores.shape, zscores.shape)
+        self.assertTrue(np.isnan(zscore_filtered_zscores[0][0]))
+        self.assertEqual(zscore_filtered_zscores[0][1], -0.195)

@@ -1,5 +1,5 @@
 {
-    "jupyter.notebookFileRoot": "${workspaceFolder}",
+    "jupyter.notebookFileRoot": "${workspaceFolder}:ephys_analysis",
     "python.testing.unittestArgs": [
         "-v",
         "-s",
@@ -8,5 +8,6 @@
         "test_*.py"
     ],
     "python.testing.pytestEnabled": false,
-    "python.testing.unittestEnabled": true
+    "python.testing.unittestEnabled": true,
+    "terminal.integrated.cwd": "${workspaceFolder:ephys_analysis}"
 }

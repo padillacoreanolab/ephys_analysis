@@ -2,7 +2,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import BaggingClassifier
 from sklearn.tree import DecisionTreeClassifier
-import lfp.lfp_analysis.LFP_analysis as lfp
+import plotting as lfplt
 import xgboost as xgb
 from sklearn.utils.class_weight import compute_sample_weight
 from sklearn.model_selection import cross_validate
@@ -211,7 +211,7 @@ def __prep_feature_data__(lfp_collection, events, baseline, event_len, pre_windo
                 post_window=post_window,
                 plot=False,
             )
-    [agent_band_dict, band_agent_dict] = lfp.band_calcs(data)
+    [agent_band_dict, band_agent_dict] = lfplt.band_calcs(data)
     data, features, feature_names = __reshape_data__(lfp_collection, agent_band_dict, mode)
     band_names = agent_band_dict.keys()
     for event in data_dict.keys():

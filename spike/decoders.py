@@ -1,5 +1,5 @@
 import numpy as np
-import spike.spike_analysis.pca_trajectories as pca_traj
+import spike.pca_trajectories as pca_traj
 from sklearn.metrics import roc_auc_score
 from sklearn.ensemble import BaggingClassifier
 from sklearn.tree import DecisionTreeClassifier

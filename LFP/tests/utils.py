@@ -2,12 +2,11 @@ import numpy as np
 import os
 import spikeinterface.extractors as se
 import spikeinterface.preprocessing as sp
-import lfp.lfp_analysis.preprocessor as preprocessor
+import lfp.preprocessor as preprocessor
 import argparse
 import requests
 import zipfile
 from io import BytesIO
-
 
 TEST_DATA_DIR = os.path.join("lfp", "tests", "test_data")
 EXAMPLE_RECORDING_DIR = os.path.join(TEST_DATA_DIR, "Example_Recording")

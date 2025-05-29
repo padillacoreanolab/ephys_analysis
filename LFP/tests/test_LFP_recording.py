@@ -1,10 +1,10 @@
 import unittest
 import os
-from lfp.lfp_analysis.LFP_recording import LFPRecording
+from lfp.LFP_recording import LFPRecording
 import numpy.testing as npt
-from lfp.tests.utils import EXAMPLE_RECORDING_FILEPATH
-import lfp.lfp_analysis.LFP_recording as lfp_recording
-import lfp.lfp_analysis.preprocessor as preprocessor
+from tests.utils import EXAMPLE_RECORDING_FILEPATH
+import lfp.LFP_recording as lfp_recording
+import preprocessor as preprocessor
 import h5py
 from unittest.mock import patch
 import io
