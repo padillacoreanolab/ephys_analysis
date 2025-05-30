@@ -7,9 +7,14 @@ This repository holds code to conduct ephys analysis on data files that come fro
 ### Setup
 1. Clone this repository:
    ```
-   bash
    git clone https://github.com/padillacoreanolab/ephys_analysis.git
-   cd ephys_analysis
+   ```
+   or use github desktop to clone it locally. 
+   
+   Open the repository in a terminal that can access conda
+
+   ``` 
+   cd users/yourname/github/ephys_analysis
    ```
 2. Create and activate conda environment
 ```
@@ -23,7 +28,7 @@ pip install -e .
 ```
 4. Clone your own project repository and import functions from ephys_analysis at top like this:
 ```
-from ephys_analysis.lfp.lfp_collection import LFPCollection
+from lfp.lfp_collection import LFPCollection
 ```
 
 ## What do you need

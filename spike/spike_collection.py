@@ -1,6 +1,8 @@
 import os
 from spike.spike_recording import SpikeRecording
 import numpy as np
+import json
+from pathlib import Path
 
 
 class SpikeCollection:
@@ -165,14 +167,23 @@ class SpikeCollection:
         else:
             unique_subjects = len(set(recording.subject for recording in self.recordings))
             subject_info = f"Number of Unique Subjects: {unique_subjects}"
-
+         
+         
+        if hasattr(self, 'timebin'):
+            analyze_info = [f"Total Analyzed Units: {total_analyzed_units}\n",
+                            f"Timebin: {self.timebin} ms\n",
+                            f"Ignore Frequency: {self.ignore_freq}\n",
+                            f"Smoothing Window: {self.smoothing_window}\n"]
+        else:
+            analyze_info = ''
         return (
             f"SpikeCollection Summary:\n"
             f"  Number of Recordings: {num_recordings}\n"
             f"  Total Good Units: {total_good_units}\n"
-            f"  Total Analyzed Units: {total_analyzed_units}\n"
+           
             f"  Average Number of Good Units: {avg_good_units:.2f}\n"
             f"  Average Number of Events per Event Type: {avg_events_per_type}\n"
+            f"  {analyze_info}\n"
             f"  {subject_info}\n"
             f"\n"
         )
@@ -182,7 +193,7 @@ class SpikeCollection:
         for recording in self.recordings:
             subject = getattr(recording, "subject", "Unknown")
             good_units = getattr(recording, "good_neurons", 0)
-            recording_length = recording.timestamps_var[-1] / recording.sampling_rate / 60  # in minutes
+            recording_length = recording.timestamps[-1] / recording.sampling_rate / 60  # in minutes
 
             # Get the number of events per event type
             event_counts = {}
@@ -200,3 +211,76 @@ class SpikeCollection:
             )
         print(f"Recording Details:\n" f"{''.join(details)}")
         return None
+    
+    def save_colletion(self, output_path):
+        output_data = {
+            "metadata": {
+                "data_path": self.path,
+                "number of recordings": len(self.recordings),
+                "sampling rate": self.sampling_rate,
+                "total good units": sum(recording.good_neurons for recording in self.recordings),
+                "average units per recording": (sum(recording.good_neurons for recording in 
+                                                    self.recordings) / len(self.recordings))
+
+        }}
+
+        collection_path = os.path.join(output_path, "spike_collection.json")
+        os.makedirs(output_path, exist_ok=True)
+
+        # Save metadata to JSON
+        with open(collection_path, "w") as f:
+            json.dump(output_data, f, indent=4, default=str)
+
+        # Create and save recordings to separate directory
+        recordings_dir = os.path.join(output_path, "recordings")
+        os.makedirs(recordings_dir, exist_ok=True)
+
+        for rec in self.recordings:
+            rec_path = os.path.join(recordings_dir, f"{rec.name}")
+            SpikeRecording.save_rec_to_h5(rec, rec_path)
+
+    @staticmethod
+    def load_collection(json_path):
+        """Load collection from JSON metadata and H5 recordings.
+
+        Parameters
+        ----------
+        json_path : str or Path
+            Path to the JSON metadata file
+
+        Returns
+        -------
+        SpikeCollection
+            Loaded collection object
+        """
+        json_path = Path(json_path)
+
+        # Load JSON metadata
+        with open(json_path, "r") as f:
+            data = json.load(f)
+
+        # Extract metadata with defaults for backward compatibility
+        metadata = data["metadata"]
+        # Create collection instance
+        collection = SpikeCollection(
+            data_path=metadata["data_path"],
+            sampling_rate=metadata["sampling_rate"],
+            json_path=json_path,
+        )
+
+        collection.load_recordings(json_path)
+        return collection
+
+    def load_recordings(self, json_path):
+        json_dir = os.path.dirname(json_path)
+        recordings_dir = os.path.join(json_dir, "recordings")
+        if not os.path.exists(recordings_dir):
+            raise FileNotFoundError(f"Recordings directory not found at {recordings_dir}")
+        self.recordings = []
+        for h5_file in Path(recordings_dir).glob("*.h5"):  # Sort for consistent loading order
+            try:
+                recording = SpikeRecording.load_rec_from_h5(h5_file)
+                self.recordings.append(recording)
+        
+            except Exception as e:
+                raise RuntimeError(f"Failed to load recording {h5_file}: {str(e)}")

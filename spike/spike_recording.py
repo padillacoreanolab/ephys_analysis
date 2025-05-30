@@ -3,6 +3,7 @@ import csv
 import numpy as np
 from collections import defaultdict
 import spike.firing_rate_calculations as fr
+import h5py
 
 
 class SpikeRecording:
@@ -399,3 +400,327 @@ class SpikeRecording:
             f"\n"
             f"{behavioral_events}"
         )
+    
+    @staticmethod
+    def save_rec_to_h5(recording, rec_path):
+        h5_path = rec_path + ".h5"
+        json_path = rec_path + ".json"
+        SpikeRecording.save_metadata_to_json(recording, json_path)
+        with h5py.File(h5_path, "w") as f:
+            # Save channel dictionary
+            data_group = f.create_group("data")
+            data_group.create_dataset("timestamps", data=recording.timestamps, compression="gzip", compression_opts=9)
+            data_group.create_dataset("unit_array", data=recording.unit_array, compression="gzip", compression_opts=9)
+            data_group.create_dataset("timestamps", data=recording.timestamps, compression="gzip", compression_opts=9)
+            unit_timestamps_group = data_group.create_group("unit_timestamps")
+        for unit_id, timestamps in recording.unit_timestamps.items():
+            unit_timestamps_group.create_dataset(str(unit_id), data=timestamps, 
+                                               compression="gzip", compression_opts=9)
+        
+        # === METADATA GROUP ===
+        metadata = f.create_group("metadata")
+        
+        # Core recording metadata
+        metadata.attrs["name"] = recording.name
+        metadata.attrs["path"] = recording.path
+        metadata.attrs["phy_path"] = recording.phy
+        metadata.attrs["sampling_rate"] = recording.sampling_rate
+        metadata.attrs["good_neurons"] = recording.good_neurons
+        
+        # Optional subject
+        if hasattr(recording, "subject"):
+            metadata.attrs["subject"] = recording.subject
+        
+        # Recording length in minutes
+        recording_length_minutes = recording.timestamps[-1] / recording.sampling_rate / 60
+        metadata.attrs["recording_length_minutes"] = recording_length_minutes
+        
+        # === LABELS DICTIONARY ===
+        labels_group = f.create_group("labels")
+        for unit_id, label in recording.labels_dict.items():
+            labels_group.attrs[str(unit_id)] = label
+        
+        # === FREQUENCY DICTIONARY ===
+        freq_group = f.create_group("frequencies")
+        for unit_id, freq in recording.freq_dict.items():
+            freq_group.attrs[str(unit_id)] = freq
+        
+        # === EVENT DICTIONARY (if exists) ===
+        if hasattr(recording, "event_dict") and recording.event_dict is not None:
+            event_group = f.create_group("events")
+            for event_name, event_data in recording.event_dict.items():
+                if isinstance(event_data, (np.ndarray, list)):
+                    event_group.create_dataset(event_name, data=np.array(event_data), 
+                                             compression="gzip", compression_opts=9)
+                else:
+                    event_group.attrs[event_name] = str(event_data)
+        
+
+
+    @staticmethod
+    def save_metadata_to_json(recording, json_path):
+        """
+        Save recording metadata to a JSON file.
+
+        Parameters:
+        -----------
+        recording : Recording object
+            The recording object containing the metadata
+        output_path : str or Path
+            Path where the JSON file should be saved
+
+        Returns:
+        --------
+        str
+            Path to the saved JSON file
+        """
+        recording_length_minutes = recording.timestamps[-1] / recording.sampling_rate / 60
+        mua_count = sum(1 for label in recording.labels_dict.values() if label == "mua")
+        good_unit_count = sum(1 for label in recording.labels_dict.values() if label == "good")
+        noise_unit_count = sum(1 for label in recording.labels_dict.values() if label == "noise")
+
+        metadata = {
+            "name": recording.name,
+            "path": recording.path,
+            "phy_path": recording.phy,
+            "sampling_rate": recording.sampling_rate,
+            "recording_length_minutes": round(recording_length_minutes, 2),
+            
+            # Subject info
+            "subject": getattr(recording, "subject", None),
+            
+            # Unit summary
+            "total_units": len(recording.labels_dict),
+            "good_units": good_unit_count,
+            "mua_units": mua_count, 
+            "noise_units": noise_unit_count,
+            "good_neurons": recording.good_neurons,
+            
+                }
+
+            # Ensure output directory exists
+        os.makedirs(os.path.dirname(json_path), exist_ok=True)
+
+        # Save to JSON file
+        with open(json_path, "w") as f:
+            json.dump(metadata, f, indent=4)
+
+    @staticmethod
+  
+@staticmethod
+def save_rec_to_h5(recording, rec_path):
+    """
+    Save SpikeRecording object to H5 file, excluding analysis-specific attributes.
+    
+    Parameters:
+    -----------
+    recording : SpikeRecording
+        The SpikeRecording object to save
+    rec_path : str
+        Base path for saving (without extension)
+    """
+    h5_path = rec_path + ".h5"
+    
+    with h5py.File(h5_path, "w") as f:
+        # === CORE DATA GROUP ===
+        data_group = f.create_group("data")
+        
+        # Save core spike data
+        data_group.create_dataset("timestamps", data=recording.timestamps, 
+                                compression="gzip", compression_opts=9)
+        data_group.create_dataset("unit_array", data=recording.unit_array, 
+                                compression="gzip", compression_opts=9)
+        
+        # Save unit timestamps dictionary
+        unit_timestamps_group = data_group.create_group("unit_timestamps")
+        for unit_id, timestamps in recording.unit_timestamps.items():
+            unit_timestamps_group.create_dataset(str(unit_id), data=timestamps, 
+                                               compression="gzip", compression_opts=9)
+        
+        # === METADATA GROUP ===
+        metadata = f.create_group("metadata")
+        
+        # Core recording metadata
+        metadata.attrs["name"] = recording.name
+        metadata.attrs["path"] = recording.path
+        metadata.attrs["phy_path"] = recording.phy
+        metadata.attrs["sampling_rate"] = recording.sampling_rate
+        metadata.attrs["good_neurons"] = recording.good_neurons
+        
+        # Optional subject
+        if hasattr(recording, "subject"):
+            metadata.attrs["subject"] = recording.subject
+        
+        # Recording length in minutes
+        recording_length_minutes = recording.timestamps[-1] / recording.sampling_rate / 60
+        metadata.attrs["recording_length_minutes"] = recording_length_minutes
+        
+        # === LABELS DICTIONARY ===
+        labels_group = f.create_group("labels")
+        for unit_id, label in recording.labels_dict.items():
+            labels_group.attrs[str(unit_id)] = label
+        
+        # === FREQUENCY DICTIONARY ===
+        freq_group = f.create_group("frequencies")
+        for unit_id, freq in recording.freq_dict.items():
+            freq_group.attrs[str(unit_id)] = freq
+        
+        # === EVENT DICTIONARY (if exists) ===
+        if hasattr(recording, "event_dict") and recording.event_dict is not None:
+            event_group = f.create_group("events")
+            for event_name, event_data in recording.event_dict.items():
+                if isinstance(event_data, (np.ndarray, list)):
+                    event_group.create_dataset(event_name, data=np.array(event_data), 
+                                             compression="gzip", compression_opts=9)
+                else:
+                    event_group.attrs[event_name] = str(event_data)
+        
+        # === ANALYSIS FLAGS (what's available, not the data itself) ===
+        analysis_flags = f.create_group("analysis_flags")
+        analysis_flags.attrs["has_been_analyzed"] = hasattr(recording, "timebin")
+        analysis_flags.attrs["has_event_dict"] = hasattr(recording, "event_dict") and recording.event_dict is not None
+        analysis_flags.attrs["all_set"] = getattr(recording, "all_set", False)
+
+@staticmethod 
+def save_metadata_to_json(recording, json_path):
+    """
+    Save SpikeRecording metadata to JSON file.
+    
+    Parameters:
+    -----------
+    recording : SpikeRecording
+        The SpikeRecording object
+    json_path : str
+        Path where JSON should be saved
+    """
+    import json
+    
+    # Calculate derived metrics
+    recording_length_minutes = recording.timestamps[-1] / recording.sampling_rate / 60
+    mua_count = sum(1 for label in recording.labels_dict.values() if label == "mua")
+    good_unit_count = sum(1 for label in recording.labels_dict.values() if label == "good")
+    noise_unit_count = sum(1 for label in recording.labels_dict.values() if label == "noise")
+    
+    metadata = {
+        # Core recording info
+        "name": recording.name,
+        "path": recording.path,
+        "phy_path": recording.phy,
+        "sampling_rate": recording.sampling_rate,
+        "recording_length_minutes": round(recording_length_minutes, 2),
+        
+        # Subject info
+        "subject": getattr(recording, "subject", None),
+        
+        # Unit summary
+        "total_units": len(recording.labels_dict),
+        "good_units": good_unit_count,
+        "mua_units": mua_count, 
+        "noise_units": noise_unit_count,
+        "good_neurons": recording.good_neurons,
+        
+        # Spike summary
+        "total_spikes": len(recording.timestamps),
+        "first_timestamp": int(recording.timestamps[0]),
+        "last_timestamp": int(recording.timestamps[-1]),
+        
+        # Frequency statistics
+        "unit_frequencies": {unit: float(freq) for unit, freq in recording.freq_dict.items()},
+        "mean_firing_rate": float(np.mean(list(recording.freq_dict.values()))) if recording.freq_dict else 0,
+        "max_firing_rate": float(np.max(list(recording.freq_dict.values()))) if recording.freq_dict else 0,
+        
+        # Event summary
+        "has_events": hasattr(recording, "event_dict") and recording.event_dict is not None,
+        "event_summary": {},
+        
+        # Analysis status
+        "has_been_analyzed": hasattr(recording, "timebin"),
+        "all_set": getattr(recording, "all_set", False)
+    }
+    
+    # Add event summary if events exist
+    if hasattr(recording, "event_dict") and recording.event_dict is not None:
+        for event_name, event_data in recording.event_dict.items():
+            if isinstance(event_data, (np.ndarray, list)):
+                metadata["event_summary"][event_name] = len(event_data)
+            else:
+                metadata["event_summary"][event_name] = str(event_data)
+    
+    # Ensure output directory exists
+    os.makedirs(os.path.dirname(json_path), exist_ok=True)
+    
+    # Save to JSON
+    with open(json_path, "w") as f:
+        json.dump(metadata, f, indent=4)
+    
+    return json_path
+
+@staticmethod
+def load_rec_from_h5(h5_path):
+    """
+    Load a SpikeRecording object from H5 file.
+    
+    Parameters:
+    -----------
+    h5_path : str
+        Path to the H5 file
+        
+    Returns:
+    --------
+    recording : SpikeRecording
+        Reconstructed SpikeRecording object
+    """
+    with h5py.File(h5_path, "r") as f:
+        # Extract metadata
+        metadata = f["metadata"]
+        
+        # Create new SpikeRecording object with minimal initialization
+        # We'll bypass the normal __init__ process and rebuild manually
+        recording = object.__new__(SpikeRecording)
+        
+        # Restore core attributes
+        recording.name = metadata.attrs["name"]
+        recording.path = metadata.attrs["path"] 
+        recording.phy = metadata.attrs["phy_path"]
+        recording.sampling_rate = metadata.attrs["sampling_rate"]
+        recording.good_neurons = metadata.attrs["good_neurons"]
+        
+        # Restore subject if it exists
+        if "subject" in metadata.attrs:
+            recording.subject = metadata.attrs["subject"]
+            
+        # Restore core data
+        data_group = f["data"]
+        recording.timestamps = data_group["timestamps"][:]
+        recording.unit_array = data_group["unit_array"][:]
+        
+        # Restore unit_timestamps dictionary
+        recording.unit_timestamps = {}
+        unit_timestamps_group = data_group["unit_timestamps"]
+        for unit_id in unit_timestamps_group.keys():
+            recording.unit_timestamps[unit_id] = unit_timestamps_group[unit_id][:]
+        
+        # Restore labels_dict
+        recording.labels_dict = {}
+        labels_group = f["labels"]
+        for unit_id, label in labels_group.attrs.items():
+            recording.labels_dict[unit_id] = label
+            
+        # Restore freq_dict  
+        recording.freq_dict = {}
+        freq_group = f["frequencies"]
+        for unit_id, freq in freq_group.attrs.items():
+            recording.freq_dict[unit_id] = freq
+            
+        # Restore event_dict if it exists
+        if "events" in f:
+            recording.event_dict = {}
+            event_group = f["events"]
+            # Load event datasets
+            for event_name in event_group.keys():
+                recording.event_dict[event_name] = event_group[event_name][:]
+            # Load event attributes  
+            for event_name, event_value in event_group.attrs.items():
+                recording.event_dict[event_name] = event_value
+        
+    return recording
