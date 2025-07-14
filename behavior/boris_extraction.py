@@ -1,6 +1,7 @@
 import numpy as np
 import behavior.behavioral_epoch_tools as bet
 
+
 def get_behavior_bouts(boris_df, subject, behavior, min_iti=0, min_bout=0):
     """
     extracts behavior bout start and stop times from a boris df
@@ -31,8 +32,9 @@ def get_behavior_bouts(boris_df, subject, behavior, min_iti=0, min_bout=0):
     start_stop_array = np.concatenate(start_stop_arrays)
     organizer = np.argsort(start_stop_array[:, 0])
     start_stop_array = start_stop_array[organizer]
+    start_stop_array_ms = start_stop_array * 1000  # convert to ms
 
-    return start_stop_array
+    return start_stop_array_ms
 
 
 def save_behavior_bouts(directory, boris_df, subject, behavior, min_iti=0, min_bout=0, filename=None):
@@ -64,6 +66,47 @@ def save_behavior_bouts(directory, boris_df, subject, behavior, min_iti=0, min_b
         filename = f"{subject}_{behavior}_bouts.npy"
 
     np.save(directory + filename, bouts_array)
+
+
+def get_behavior_bouts_frame(boris_df, cameratimestamps, subject, behavior, min_iti=0, min_bout=0):
+    """
+    extracts behavior bout start and stop times from a boris df
+    thresholds individually by subject and behavior
+    returns start_stop_array ordered by start values
+
+    Args (6 total, 4 required):
+        boris_df: pandas dataframe of a boris file (aggregated event table)
+        cameratimestamps: numpy array of camera timestamps (in seconds) read from .videoTimeStamps file generated from trodes
+        subject: list of strings or ints, desired subject(s)
+                as written in boris_df, i.e. 'novel' or 1.1
+        behavior: list of strings, desired behavior(s) (as written in boris_df)
+        min_iti: float, default=0, bouts w/ itis(s) < min_iti will be combined
+        min_bout: float, default=0, bouts < min_bout(s) will be deleted
+
+    Returns (1):
+        numpy array (ndim=(n bouts, 2)) of start&stop times (ms)
+    """
+    start_stop_arrays = []
+    for mouse in subject:
+        subject_df = boris_df[boris_df["Subject"] == mouse]
+        subject_df["Image index stop"] = subject_df["Image index stop"].fillna(
+            subject_df["Image index start"].shift(-1)
+        )
+        behavior_arrays = []
+        for act in behavior:
+            behavior_df = subject_df[subject_df["Behavior"] == act]
+            start_stop_array = behavior_df[["Image index start", "Image index stop"]].to_numpy()
+            behavior_arrays.append(start_stop_array)
+        start_stop_array = np.concatenate(behavior_arrays)
+        start_stop_array = start_stop_array.astype(int)
+        start_stop_array_s = cameratimestamps[start_stop_array]
+        start_stop_arrays.append(bet.threshold_bouts(start_stop_array_s, min_iti, min_bout))
+    start_stop_array = np.concatenate(start_stop_arrays)
+    organizer = np.argsort(start_stop_array[:, 0])
+    start_stop_array = start_stop_array[organizer]
+    start_stop_array_ms = start_stop_array * 1000  # convert to ms
+
+    return start_stop_array_ms
 
 
 def reciprocal_bouts(bouts_array, time_window=None):

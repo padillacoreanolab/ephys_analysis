@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-"""
+""" """
 import os
 import warnings
 import re
@@ -446,11 +445,24 @@ def get_all_trodes_data_from_directory(parent_directory_path="."):
     return directory_to_file_to_data
 
 
-def main():
+def readCameraModuleTimeStamps(filename):
     """
-    Main function that runs when the script is run
+    The below function reads the header in order to get the clock rate, then
+    reads the rest of the file as uint32s and divides by the clock rate to get
+    the timestamps in seconds.
+
+    The header length switches, so reading lines seems more reliable..
+    Encoding appears to be latin-1, not UTF-8.
     """
-
-
-if __name__ == "__main__":
-    main()
+    CLOCK_STRING = "Clock rate: "
+    HEADER_END_STRING = "End settings"
+    with open(filename, "r", encoding="latin-1") as fid:
+        while True:
+            header_text = fid.readline()
+            # find substring "clock rate: " in header_text
+            if header_text.find(CLOCK_STRING) != -1:
+                clock_rate = int(re.search(r"\d+", header_text)[0])
+            elif header_text.find(HEADER_END_STRING) != -1:
+                break
+        timestamps = np.fromfile(fid, dtype=np.uint32) / clock_rate
+    return timestamps

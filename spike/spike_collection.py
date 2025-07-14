@@ -140,7 +140,7 @@ class SpikeCollection:
             sum(recording.good_neurons for recording in self.recordings) / num_recordings if num_recordings > 0 else 0
         )
         total_good_units = sum(recording.good_neurons for recording in self.recordings)
-        for recording in self.recordings: 
+        for recording in self.recordings:
             if hasattr(recording, "analyzed_neurons"):
                 calculate_analyzed_neurons = True
             else:
@@ -167,20 +167,20 @@ class SpikeCollection:
         else:
             unique_subjects = len(set(recording.subject for recording in self.recordings))
             subject_info = f"Number of Unique Subjects: {unique_subjects}"
-         
-         
-        if hasattr(self, 'timebin'):
-            analyze_info = [f"Total Analyzed Units: {total_analyzed_units}\n",
-                            f"Timebin: {self.timebin} ms\n",
-                            f"Ignore Frequency: {self.ignore_freq}\n",
-                            f"Smoothing Window: {self.smoothing_window}\n"]
+
+        if hasattr(self, "timebin"):
+            analyze_info = [
+                f"Total Analyzed Units: {total_analyzed_units}\n",
+                f"Timebin: {self.timebin} ms\n",
+                f"Ignore Frequency: {self.ignore_freq}\n",
+                f"Smoothing Window: {self.smoothing_window}\n",
+            ]
         else:
-            analyze_info = ''
+            analyze_info = ""
         return (
             f"SpikeCollection Summary:\n"
             f"  Number of Recordings: {num_recordings}\n"
             f"  Total Good Units: {total_good_units}\n"
-           
             f"  Average Number of Good Units: {avg_good_units:.2f}\n"
             f"  Average Number of Events per Event Type: {avg_events_per_type}\n"
             f"  {analyze_info}\n"
@@ -211,7 +211,7 @@ class SpikeCollection:
             )
         print(f"Recording Details:\n" f"{''.join(details)}")
         return None
-    
+
     def save_colletion(self, output_path):
         output_data = {
             "metadata": {
@@ -219,10 +219,11 @@ class SpikeCollection:
                 "number of recordings": len(self.recordings),
                 "sampling rate": self.sampling_rate,
                 "total good units": sum(recording.good_neurons for recording in self.recordings),
-                "average units per recording": (sum(recording.good_neurons for recording in 
-                                                    self.recordings) / len(self.recordings))
-
-        }}
+                "average units per recording": (
+                    sum(recording.good_neurons for recording in self.recordings) / len(self.recordings)
+                ),
+            }
+        }
 
         collection_path = os.path.join(output_path, "spike_collection.json")
         os.makedirs(output_path, exist_ok=True)
@@ -281,6 +282,6 @@ class SpikeCollection:
             try:
                 recording = SpikeRecording.load_rec_from_h5(h5_file)
                 self.recordings.append(recording)
-        
+
             except Exception as e:
                 raise RuntimeError(f"Failed to load recording {h5_file}: {str(e)}")

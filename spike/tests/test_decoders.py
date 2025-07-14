@@ -10,4 +10,4 @@ import spike.spike_collection as spike
 #         indices = decoders.get_indices(test_list)
 #         self.assertEqual(indices, [(0, 3), (4, 7), (8, 10)])
 
-    # def test_pca_matrix(self):
+# def test_pca_matrix(self):

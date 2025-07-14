@@ -51,20 +51,20 @@ This folder contains scripts to do analysis on spike-sorted data output from Phy
 |            | + event_snippets()         |                                |
 |            | + unit_event_firing_rates()|                                |
 |            | + event_firing_rates()     |                                |
-|            +----------------------------+                                |
-+--------------------------------------------------------------------------+
-      |                                  |
-      | used as input for                | used as input for  
-      v                                  v
-+--------------------------+      +----------------------------+     +--------------------+      +--------------+
-| normalization            |      | pca_trajectories           |     | single_cell        |      | decoders     |  
-+--------------------------+      +----------------------------+
-| + zscore_global()        |      | + geodesic_distances()     |
-| + zscore_baseline_event()|      | + distance_bw_trajectory() |
-| + zscore_pre_event()     |      | + pca_matrix()             |
-| + zscore_plot()          |      | + avg_trajectories_pca()   |
-+--------------------------+      | + trial_trajcetories_pca() |
-                                  | + condition_pca()          |
+|            +----------------------------+                                | ----------------------------------------+
++--------------------------------------------------------------------------+                                         |
+      |                                  |                               |                                           |
+      | used as input for                | used as input for             | used as input for                         |
+      v                                  v                               v                                           v
++--------------------------+      +----------------------------+     +---------------------------------+       +--------------+
+| normalization            |      | pca_trajectories           |     | single_cell                     |       | decoders     |  
++--------------------------+      +----------------------------+     +---------------------------------+
+| + zscore_global()        |      | + geodesic_distances()     |     | + wilcoxon_collection()         |
+| + zscore_baseline_event()|      | + distance_bw_trajectory() |     | + wilcoxon_event1v2_collection()|
+| + zscore_pre_event()     |      | + pca_matrix()             |     | + fisher_exact_wilcoxon()       |
+| + zscore_plot()          |      | + avg_trajectories_pca()   |     | + bootstrap()                   |
++--------------------------+      | + trial_trajcetories_pca() |     | + plot_raster()                 |
+                                  | + condition_pca()          |     +---------------------------------+
                                   | + LOO_PCA()                |
                                   +----------------------------+
                                   |returns a PCAResult object  |

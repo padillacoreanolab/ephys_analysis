@@ -36,75 +36,29 @@ from lfp.lfp_collection import LFPCollection
 - Spike: current version of this code assumes you have done manual spike sorting through Phy and have saved everything under a *merged.rec/phy/.. data structure. 
 - Behavior: both Spike and LFP analysis require the same format of behavior input for analysis, currently helper functions exist under Behavior for BORIS and ECU derived behavior data. 
 
-## Step 0. LFP + ECU + Analog
+## Setting up your Trodes folder using helper_fxns folder
+
+### Extracting relevant files: LFP + ECU + Analog 
 trodes_export.py has functions that will allow you batch export various files through trodes. You will need trodes installed onto your local device. 
 - time: export needed to find the first timestamp of a recording for all LFP, ECU and analog analysis
 - DIO: if you used the ECU to record operant chamber inputs, you will need to extract DIO files 
 - analog: if you used any Ain inputs to record, you will need to extract analog files 
 
+### Converting h264 videos into sleap friendly mp4s
+Under helper functions is also a suite of conversion functions to convert h264 files (or any video format) into a sleap friendly mp4. This also helps if you want to use BORIS or AnyMaze or any other software to do behavior classification. 
 
+# Contents of this repository 
+It is highly recommended that users understand what a class is in python to most effectively use the following scripts. The lfp and spike folders each have the own README for more detailed overviews of the contents of those folders. 
 
+## Spike 
+This folder contains scripts to analyze the output of phy manually curated spikes. It contains scripts to do single cell analyses (Wilcoxon tests, raster plots, and bootstrap firing rate comparisons), PCA analyses and trajectory visualizations, classifiers to predict  behavioral events based on population activity, and functions to normalize firing rates. 
 
+## LFP
+This folder contains scripts to analyze the output of a trodes recording. It contains scripts to calculate power, coherence and Granger causality using the package [Multitaper Spectral Connectivity](https://spectral-connectivity.readthedocs.io/en/latest/index.html). It is highly recommended to use the Hipergator (or other high computing cluster) to do so. GPU greatly increases speed of computation for Granger causality specifically and allows you to more readily load all your recordings into working memory to perform data analysis and plotting.  
 
-## .vscode settings: 
+Below are a few instructions on how to use rclone to get your large datasets from dropbox to the remote computing cluster: 
 
-To use this notebook the most efficiently, open the ephys_analysis repository in your vscode workspace then under file press Add Folder to Workspace. This folder should be your own personal workspace folder. 
-
-Then change your current working directory through the settings tab under workspace (File>Preference>Settings or Ctrl+, and click the workspace tab and Ctrl+F "terminal cwd")
-
-Jupyter: Notebook File Root
-${workspaceFolder:ephys_analysis}
-
-this means that the parent folder opened in VSCode is the workspaceFolder which is set as the working directory 
-
-**note: where a jupyternotebook lives is not necessarily where
-it is being run, those are two different things. 
-
-- This is important because it is brittle to have imports be relative to where the jupyter notebook file is stored for importing local modules and extremely important for [pickling and unpickling](https://stackoverflow.com/a/2121918). Eg, if you wanted to move notebooks, or have notebooks be portable from computer to computer
-
-## Installation
-
-```
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-# Developer installation
-
-## How to run tests like a real coder
-
-### Download test data
-
-We're going to use this small recording from trodes:
-https://docs.spikegadgets.com/en/latest/basic/BasicUsage.html
-
-There is a helper script that downloads it and unzips it into `tests/test_data/`.
-
-```
-python -m tests.utils download_test_data
-```
-
-please open terminal and run in this directory
-
-```
-python -m unittest discover -s *folder_you_want_to_test* -p '*test*.py
-```
-
-## How to run single files as modules
-
-For example, to turn a dataset into a test:
-
-```
-python -m tests.utils create /Volumes/SheHulk/cups/data/11_cups_p4.rec/11_cups_p4_merged.rec
-```
-
-This is nice because it allows all imports to be relative to the root directory.
-
-
-
-
-### dropbox
+### dropbox + rclone
 1. install rclone on your local computer: https://rclone.org/downloads/
 2. run on personal computer 
 ```
@@ -128,8 +82,9 @@ rclone config
 - copy and paste config token from local terminal into hipergator terminal
 - click y and hit enter for default settings to finish
 
-if authentication breaks press choose: e) Edit existing remote 
-4. find data on dropbox
+if authentication breaks press choose: 
+- e) Edit existing remote 
+- 4. find data on dropbox
 ```
 rclone ls pc-dropbox:"Padilla-Coreano Lab/path/to/data"
 ```
@@ -158,3 +113,33 @@ or to upload data to dropbox:
 ```
 rclone copy ./r4_predictions pc-dropbox:"Padilla-Coreano Lab/2024/Cum_SocialMemEphys_pilot2/SLEAP/only_subject_mp4s/r4_predictions" --progress --dry-run
 ```
+# Developer installation
+
+## How to run tests
+
+### Download test data
+
+We're going to use this small recording from trodes:
+https://docs.spikegadgets.com/en/latest/basic/BasicUsage.html
+
+There is a helper script that downloads it and unzips it into `tests/test_data/`.
+
+```
+python -m tests.utils download_test_data
+```
+
+please open terminal and run in this directory
+
+```
+python -m unittest discover -s *folder_you_want_to_test* -p '*test*.py
+```
+
+## How to run single files as modules
+
+For example, to turn a dataset into a test:
+
+```
+python -m tests.utils create /Volumes/SheHulk/cups/data/11_cups_p4.rec/11_cups_p4_merged.rec
+```
+
+This is nice because it allows all imports to be relative to the root directory.
